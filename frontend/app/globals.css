@@ -436,3 +436,144 @@ code {
   font-size: 0.8rem;
   text-align: right;
 }
+
+/* ====== My-History + My-Note widgets (풀이 화면) ====== */
+
+.my-history {
+  margin-top: 1.5rem;
+}
+
+.my-history-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.88rem;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.my-history-toggle:hover {
+  border-color: var(--accent);
+  color: var(--foreground);
+}
+
+.my-history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+}
+
+.my-history-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.45rem 0.8rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+}
+
+.my-history-meta {
+  color: var(--muted);
+  font-family: ui-monospace, monospace;
+}
+
+.my-history-time {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.my-note {
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+}
+
+.my-note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+
+.my-note-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.my-note-status {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.my-note-textarea {
+  width: 100%;
+  background: var(--background);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  padding: 0.7rem;
+  font: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+  min-height: 140px;
+  outline: none;
+}
+
+.my-note-textarea:focus {
+  border-color: var(--accent);
+}
+
+.my-note-textarea:disabled {
+  opacity: 0.6;
+}
+
+.my-note-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 0.6rem;
+}
+
+/* ====== Notes index page ====== */
+
+.note-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.note-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.6rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.note-problem {
+  font-family: ui-monospace, monospace;
+  font-size: 0.9rem;
+  color: var(--accent);
+}
+
+.note-snippet {
+  color: var(--foreground);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.note-time {
+  color: var(--muted);
+  font-size: 0.78rem;
+}

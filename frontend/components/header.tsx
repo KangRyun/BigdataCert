@@ -26,9 +26,20 @@ export default function Header() {
             문제
           </Link>
           {user && (
-            <Link href="/me" className={pathname?.startsWith("/me") ? "active" : ""}>
-              내 학습
-            </Link>
+            <>
+              <Link
+                href="/me"
+                className={pathname === "/me" ? "active" : ""}
+              >
+                내 학습
+              </Link>
+              <Link
+                href="/me/notes"
+                className={pathname?.startsWith("/me/notes") ? "active" : ""}
+              >
+                오답노트
+              </Link>
+            </>
           )}
           {loading ? null : user ? (
             <>

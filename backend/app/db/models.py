@@ -7,7 +7,7 @@ Submission: 학습자가 채점받은 결과 (코드 + 결과).
 
 from datetime import UTC, datetime
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -31,6 +31,9 @@ class User(Base):
     submissions: Mapped[list["Submission"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    notes: Mapped[list["Note"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class Submission(Base):
@@ -52,3 +55,25 @@ class Submission(Base):
     )
 
     user: Mapped["User"] = relationship(back_populates="submissions")
+
+
+class Note(Base):
+    """오답노트 — 학습자가 한 문제에 대해 남기는 메모. 1 user × 1 problem = 1 note."""
+
+    __tablename__ = "notes"
+    __table_args__ = (UniqueConstraint("user_id", "problem_id", name="uq_notes_user_problem"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    problem_id: Mapped[str] = mapped_column(String(100), index=True, nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_now, nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_now, onupdate=_now, nullable=False
+    )
+
+    user: Mapped["User"] = relationship(back_populates="notes")

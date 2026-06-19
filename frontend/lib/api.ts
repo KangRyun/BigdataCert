@@ -83,6 +83,14 @@ export interface ProgressResponse {
   written: TypeProgress;
 }
 
+export interface MyNote {
+  id: number;
+  problem_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export class ApiError extends Error {
   constructor(public status: number, public errorCode: string | null, message: string) {
     super(message);
@@ -156,6 +164,21 @@ export const api = {
     return request<MeSubmission[]>(`/me/submissions${suffix}`);
   },
   myProgress: () => request<ProgressResponse>("/me/progress"),
+  listMyNotes: () => request<MyNote[]>("/me/notes"),
+  getMyNote: (problem_id: string) =>
+    request<MyNote>(`/me/notes/${encodeURIComponent(problem_id)}`),
+  upsertMyNote: (problem_id: string, content: string) =>
+    request<MyNote>(`/me/notes/${encodeURIComponent(problem_id)}`, {
+      method: "PUT",
+      body: JSON.stringify({ content }),
+    }),
+  deleteMyNote: (problem_id: string) =>
+    fetch(`${baseUrl()}/me/notes/${encodeURIComponent(problem_id)}`, {
+      method: "DELETE",
+      headers: _authToken ? { Authorization: `Bearer ${_authToken}` } : undefined,
+    }).then((res) => {
+      if (!res.ok) throw new ApiError(res.status, null, "DELETE note failed");
+    }),
 };
 
 export const ERROR_MESSAGES: Record<string, string> = {
@@ -171,4 +194,5 @@ export const ERROR_MESSAGES: Record<string, string> = {
   AUTH_REQUIRED: "로그인이 필요합니다.",
   MISSING_ARTIFACT: "제출 파일(pred.csv 등)을 찾을 수 없습니다.",
   SHAPE_MISMATCH: "제출 파일의 형식이 기대와 다릅니다.",
+  NOTE_NOT_FOUND: "노트가 아직 없습니다.",
 };

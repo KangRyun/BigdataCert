@@ -11,6 +11,10 @@ import {
   type ProblemDetail,
   api,
 } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+
+import MyHistory from "./my-history";
+import MyNote from "./my-note";
 
 const CodeEditor = dynamic(() => import("./code-editor"), {
   ssr: false,
@@ -55,11 +59,13 @@ function getStarter(p: ProblemDetail): string {
 }
 
 export default function ProblemSolver({ problem }: { problem: ProblemDetail }) {
+  const { user } = useAuth();
   const [code, setCode] = useState<string>(() => getStarter(problem));
   const [result, setResult] = useState<GradingResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hintsRevealed, setHintsRevealed] = useState(0);
+  const [submitCount, setSubmitCount] = useState(0);
 
   async function handleSubmit() {
     if (submitting) return;
@@ -68,6 +74,7 @@ export default function ProblemSolver({ problem }: { problem: ProblemDetail }) {
     try {
       const r = await api.submit(problem.problem_id, code);
       setResult(r);
+      setSubmitCount((c) => c + 1);
     } catch (e) {
       const msg =
         e instanceof ApiError
@@ -169,6 +176,13 @@ export default function ProblemSolver({ problem }: { problem: ProblemDetail }) {
             </div>
           )}
         </div>
+      )}
+
+      {user && (
+        <>
+          <MyHistory problemId={problem.problem_id} refreshKey={submitCount} />
+          <MyNote problemId={problem.problem_id} />
+        </>
       )}
     </>
   );
