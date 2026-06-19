@@ -1,0 +1,27 @@
+{
+  "problem_id": "pp2-imbalanced-001",
+  "exam_type": "practical_2",
+  "title": "불균형 데이터의 사기(fraud) 탐지",
+  "difficulty": "hard",
+  "topic_tags": ["classification", "imbalanced", "roc-auc", "modeling"],
+  "description": "약 13% 만이 사기인 매우 불균형한 거래 데이터입니다. 사기 확률을 예측하세요.\n\n## 데이터\n- `train.csv` — 350행. 컬럼: `transaction_amount`, `n_recent_attempts`, `is_new_device`, `minutes_since_last`, `country_risk`, `fraud`(타겟 0/1).\n- `test.csv` — 120행. fraud 없음.\n\n## 제출\n- 120행 1열 `pred.csv` (컬럼명 `pred`, 사기일 확률 0~1).\n- `predict_proba(test)[:, 1]` 의 결과.\n\n## 평가\n- ROC-AUC ≥ 0.80 통과 (허용 오차 ±0.03).\n- 불균형 데이터이므로 `class_weight='balanced'` 또는 적절한 sampling 이 도움.",
+  "sample_data": {
+    "train.csv": "data/pp2-imbalanced-001/train.csv",
+    "test.csv": "data/pp2-imbalanced-001/test.csv"
+  },
+  "truth_data": {"truth.csv": "data/pp2-imbalanced-001/truth.csv"},
+  "expected_output": {
+    "format": "csv",
+    "schema": "pred",
+    "metric": "roc_auc",
+    "baseline": 0.80,
+    "tolerance": 0.03
+  },
+  "hints": [
+    "`train['fraud'].mean()` 으로 양성 비율을 확인하세요. 13% 수준일 것입니다.",
+    "RandomForestClassifier 에 `class_weight='balanced'` 옵션을 주면 소수 클래스에 가중치가 부여돼 AUC 가 개선됩니다.",
+    "최종 제출은 predict_proba 의 양성 클래스 확률 컬럼(`[:, 1]`)."
+  ],
+  "solution_code": "import pandas as pd\nfrom sklearn.ensemble import RandomForestClassifier\n\ntrain = pd.read_csv('train.csv')\ntest = pd.read_csv('test.csv')\n\ny = train['fraud']\nX = train.drop(columns=['fraud'])\n\nmodel = RandomForestClassifier(\n    n_estimators=400, random_state=42, n_jobs=-1, class_weight='balanced'\n).fit(X, y)\n\nprob = model.predict_proba(test)[:, 1]\npd.DataFrame({'pred': prob}).to_csv('pred.csv', index=False)\n",
+  "explanation": "## 풀이 접근\n\n1. **불균형 인식**: `train['fraud'].mean()` 이 13% 면 단순 정확도(accuracy) 가 거의 의미 없는 평가. AUC, PR-AUC, F1 이 적합.\n2. **class_weight='balanced'**: 손실 함수에서 소수 클래스 가중치 ↑. 데이터 합성(SMOTE) 없이도 효과 큼.\n3. **확률 제출**: ROC-AUC 는 순위 기반이므로 확률값을 그대로.\n\n## 흔한 오답\n\n- **predict 의 0/1 라벨 제출**: AUC 가 거의 0.5 근처로 떨어집니다.\n- **불균형 무시**: 기본 옵션으로 학습하면 다수 클래스에 편중.\n- **threshold 조정**: AUC 는 threshold 와 무관. 다른 metric (예: F1) 이라면 threshold tuning 이 필요하지만 이 문제는 AUC."
+}

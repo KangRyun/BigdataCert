@@ -1,0 +1,27 @@
+{
+  "problem_id": "pp2-multi-001",
+  "exam_type": "practical_2",
+  "title": "3-클래스 다중 분류",
+  "difficulty": "medium",
+  "topic_tags": ["classification", "multiclass", "f1-macro", "modeling"],
+  "description": "4개 특성으로 0/1/2 세 클래스 중 하나를 예측하세요.\n\n## 데이터\n- `train.csv` — 240행. 컬럼: `feature_a`, `feature_b`, `feature_c`, `feature_d`, `label`(타겟 0/1/2)\n- `test.csv` — 80행. label 없음.\n\n## 제출\n- 80행 1열 `pred.csv` (컬럼명 `pred`, **클래스 정수** 0/1/2).\n- `model.predict(test)` 의 결과를 그대로.\n\n## 평가\n- F1 (macro) ≥ 0.55 통과, 허용 오차 ±0.03.\n- predict_proba 가 아닌 **predict** 결과 (정수) 를 제출.",
+  "sample_data": {
+    "train.csv": "data/pp2-multi-001/train.csv",
+    "test.csv": "data/pp2-multi-001/test.csv"
+  },
+  "truth_data": {"truth.csv": "data/pp2-multi-001/truth.csv"},
+  "expected_output": {
+    "format": "csv",
+    "schema": "pred",
+    "metric": "f1_macro",
+    "baseline": 0.55,
+    "tolerance": 0.03
+  },
+  "hints": [
+    "label 을 분리하고 RandomForestClassifier(n_estimators=300, random_state=42) 로 학습.",
+    "다중 클래스에서 F1 macro 는 클래스별 F1 의 단순 평균이라 클래스 균형이 중요. 모델이 한 클래스에 치우치면 점수가 떨어집니다.",
+    "model.predict(test) 의 결과를 `pred` 컬럼으로 저장."
+  ],
+  "solution_code": "import pandas as pd\nfrom sklearn.ensemble import RandomForestClassifier\n\ntrain = pd.read_csv('train.csv')\ntest = pd.read_csv('test.csv')\n\ny = train['label']\nX = train.drop(columns=['label'])\n\nmodel = RandomForestClassifier(n_estimators=300, random_state=42, n_jobs=-1).fit(X, y)\npred = model.predict(test)\n\npd.DataFrame({'pred': pred}).to_csv('pred.csv', index=False)\n",
+  "explanation": "## 풀이 접근\n\n1. 단순 트리 앙상블로 시작하는 게 안전합니다.\n2. F1 macro 는 클래스 빈도와 무관하게 클래스마다 동일 가중. 한 클래스를 무시하면 큰 페널티.\n3. 클래스 비율은 대략 1:1:1 이지만 미세하게 다를 수 있어 confusion matrix 로 점검하면 좋습니다.\n\n## 흔한 오답\n\n- **predict_proba 제출**: F1 metric 에선 무조건 클래스 라벨. 확률을 제출하면 채점기 파싱은 통과해도 점수가 망가집니다.\n- **클래스 수치형 처리**: 0/1/2 가 순서 있는 척도라고 잘못 가정하면 회귀 모델로 풀게 되어 점수가 떨어집니다.\n- **stratified split 누락**: 검증 시도 시 stratify=y 를 빼면 평가 편향."
+}

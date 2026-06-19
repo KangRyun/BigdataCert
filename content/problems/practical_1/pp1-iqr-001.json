@@ -1,0 +1,17 @@
+{
+  "problem_id": "pp1-iqr-001",
+  "exam_type": "practical_1",
+  "title": "IQR 기준 이상치 개수",
+  "difficulty": "easy",
+  "topic_tags": ["preprocessing", "outliers", "iqr", "pandas"],
+  "description": "`data.csv` 에는 하나의 수치형 컬럼 `value` 가 있습니다.\n\nIQR(InterQuartile Range) 방식으로 이상치를 정의했을 때, 이상치에 해당하는 행의 개수를 **정수**로 출력하시오.\n\n## 이상치 정의\n- Q1 = 1사분위수 (25th percentile)\n- Q3 = 3사분위수 (75th percentile)\n- IQR = Q3 − Q1\n- 이상치: `value < Q1 - 1.5 * IQR` 또는 `value > Q3 + 1.5 * IQR`\n\n## 출력\n- 단일 정수.",
+  "sample_data": {"data.csv": "data/pp1-iqr-001/data.csv"},
+  "expected_output": {"format": "scalar", "schema": "int", "tolerance": 0.0, "answer": 8},
+  "hints": [
+    "`pd.read_csv` 로 데이터를 불러온 뒤 `quantile(0.25)`, `quantile(0.75)` 로 Q1, Q3 를 구하세요.",
+    "IQR = Q3 - Q1, 경계는 Q1 - 1.5*IQR 과 Q3 + 1.5*IQR.",
+    "조건 `(value < lo) | (value > hi)` 의 `.sum()` 으로 이상치 개수를 얻고 `int()` 로 캐스팅 후 print."
+  ],
+  "solution_code": "import pandas as pd\n\ndf = pd.read_csv('data.csv')\nv = df['value']\nq1, q3 = v.quantile(0.25), v.quantile(0.75)\niqr = q3 - q1\nlo, hi = q1 - 1.5 * iqr, q3 + 1.5 * iqr\nprint(int(((v < lo) | (v > hi)).sum()))\n",
+  "explanation": "## 풀이 접근\n\n1. `quantile(0.25)`, `quantile(0.75)` 로 Q1, Q3 산출.\n2. IQR = Q3 − Q1.\n3. 이상치 경계: `[Q1 − 1.5·IQR, Q3 + 1.5·IQR]` 의 바깥.\n4. boolean 시리즈를 sum 하면 True 개수.\n\n## 흔한 오답\n\n- **3 × IQR 사용**: 극단치(extreme) 정의와 혼동. 표준은 1.5 × IQR.\n- **경계 포함/제외 혼동**: 시험 정의대로 strict inequality (`<`, `>`) 사용.\n- **`np.percentile(v, 25)`**: pandas 와 보간 방식이 미세하게 다를 수 있음. `Series.quantile` 권장."
+}

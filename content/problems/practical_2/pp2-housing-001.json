@@ -1,0 +1,27 @@
+{
+  "problem_id": "pp2-housing-001",
+  "exam_type": "practical_2",
+  "title": "주택 가격 회귀",
+  "difficulty": "medium",
+  "topic_tags": ["regression", "preprocessing", "modeling"],
+  "description": "주택 특성 데이터로 가격(price)을 예측하는 회귀 모델을 만드세요.\n\n## 데이터\n- `train.csv` — 250행. 컬럼: `rooms`, `area_sqm`, `age_years`, `near_subway`, `floor`, `price`(타겟)\n- `test.csv` — 80행. price 컬럼 없음.\n\n## 제출\n- 80행 1열짜리 `pred.csv` (컬럼명: `pred`, 값: 예측 가격 실수)\n- `pd.DataFrame({'pred': pred}).to_csv('pred.csv', index=False)`\n\n## 평가\n- RMSE ≤ 2400 통과 (허용 오차 +200).\n- 트리 기반 모델이면 충분히 통과 가능.",
+  "sample_data": {
+    "train.csv": "data/pp2-housing-001/train.csv",
+    "test.csv": "data/pp2-housing-001/test.csv"
+  },
+  "truth_data": {"truth.csv": "data/pp2-housing-001/truth.csv"},
+  "expected_output": {
+    "format": "csv",
+    "schema": "pred",
+    "metric": "rmse",
+    "baseline": 2400,
+    "tolerance": 200
+  },
+  "hints": [
+    "타겟 컬럼 `price` 를 분리: `y = train['price']`, `X = train.drop(columns=['price'])`.",
+    "특성은 모두 수치형이라 별도 인코딩 없이 RandomForestRegressor(n_estimators=300, random_state=42) 로 학습 가능.",
+    "예측값을 pd.DataFrame({'pred': ...}).to_csv('pred.csv', index=False) 로 저장."
+  ],
+  "solution_code": "import pandas as pd\nfrom sklearn.ensemble import RandomForestRegressor\n\ntrain = pd.read_csv('train.csv')\ntest = pd.read_csv('test.csv')\n\ny = train['price']\nX = train.drop(columns=['price'])\n\nmodel = RandomForestRegressor(n_estimators=300, random_state=42, n_jobs=-1).fit(X, y)\npred = model.predict(test)\n\npd.DataFrame({'pred': pred}).to_csv('pred.csv', index=False)\n",
+  "explanation": "## 풀이 접근\n\n1. 모든 특성이 수치형이라 전처리가 단순합니다.\n2. RandomForestRegressor 는 비선형 관계와 변수 간 상호작용을 잘 잡습니다.\n3. RMSE 평가이므로 회귀 출력을 그대로 저장.\n\n## 흔한 오답\n\n- **컬럼 순서 mismatch**: test 와 train 의 컬럼 순서가 다르면 학습/예측이 어긋날 수 있습니다. drop 만 사용하면 안전합니다.\n- **표준화 누락**: 트리 모델은 스케일 영향이 없으므로 굳이 필요 없으나, 선형 회귀를 쓴다면 StandardScaler 가 도움이 됩니다.\n- **id 컬럼 포함**: 이 문제는 id 가 없습니다."
+}

@@ -1,0 +1,17 @@
+{
+  "problem_id": "pp1-quantile-001",
+  "exam_type": "practical_1",
+  "title": "상위 25% 데이터의 평균",
+  "difficulty": "easy",
+  "topic_tags": ["preprocessing", "quantile", "aggregation", "pandas"],
+  "description": "`data.csv` 는 단일 컬럼 `score` (실수) 로 구성됩니다.\n\n`score` 의 **상위 25% (≥ 75-percentile)** 에 해당하는 행들의 평균을 **소수 둘째 자리까지 반올림** 해 출력하시오.\n\n## 출력\n- 단일 실수.",
+  "sample_data": {"data.csv": "data/pp1-quantile-001/data.csv"},
+  "expected_output": {"format": "scalar", "schema": "float", "tolerance": 0.05, "answer": 92.33},
+  "hints": [
+    "`df['score'].quantile(0.75)` 가 75-percentile 경계값입니다.",
+    "조건 `df['score'] >= threshold` 로 상위 25% 만 필터링하세요.",
+    "필터링된 시리즈의 `.mean()` 을 `round(_, 2)` 로 출력."
+  ],
+  "solution_code": "import pandas as pd\n\ndf = pd.read_csv('data.csv')\nthreshold = df['score'].quantile(0.75)\ntop = df.loc[df['score'] >= threshold, 'score']\nprint(round(float(top.mean()), 2))\n",
+  "explanation": "## 풀이 접근\n\n1. `quantile(0.75)` 로 75-percentile 임계값 산출.\n2. `score >= threshold` 로 상위 25% 필터링 (경계값 자체는 상위에 포함하는 게 일반적).\n3. 평균 → round 2.\n\n## 흔한 오답\n\n- **strict 비교 (`>`)**: 경계값을 제외하면 통상 정의와 다릅니다.\n- **`nlargest(int(n*0.25))` 사용**: 25% 가 정확히 정수가 아니면 결과가 달라집니다. quantile 기준이 정석.\n- **`describe()['75%']`**: 같은 값이지만 quantile 호출이 더 명시적."
+}

@@ -1,0 +1,22 @@
+{
+  "problem_id": "pp3-corr-001",
+  "exam_type": "practical_3",
+  "title": "피어슨 상관계수와 유의성",
+  "difficulty": "easy",
+  "topic_tags": ["statistics", "correlation", "pearson"],
+  "description": "`data.csv` 의 두 수치형 변수 `x`, `y` 의 피어슨 상관계수와 양측 p-value 를 구하세요.\n\n## 출력\n출력 마지막 줄에 다음 형식의 딕셔너리를 print 하세요. 소수 4자리 반올림:\n\n```python\nprint({'correlation': 0.0000, 'p_value': 0.0000})\n```\n\n## 평가\n- ±0.001 허용 오차로 키 두 개 모두 일치.",
+  "sample_data": {"data.csv": "data/pp3-corr-001/data.csv"},
+  "expected_output": {
+    "format": "dict",
+    "schema": {"correlation": "float", "p_value": "float"},
+    "tolerance": 0.001,
+    "answer": {"correlation": 0.709, "p_value": 0.0}
+  },
+  "hints": [
+    "scipy.stats.pearsonr(x, y) 가 (상관계수, p-value) 를 반환합니다.",
+    "Series 그대로 넘기면 됩니다.",
+    "round(value, 4) 후 dict 로 print."
+  ],
+  "solution_code": "import pandas as pd\nimport scipy.stats as stats\n\ndf = pd.read_csv('data.csv')\nr, p = stats.pearsonr(df['x'], df['y'])\nprint({'correlation': round(float(r), 4), 'p_value': round(float(p), 4)})\n",
+  "explanation": "## 풀이 접근\n\n1. `pearsonr(x, y)` → (r, p).\n2. round 후 dict.\n\n**결과**: r ≈ 0.71 (강한 양의 상관), p ≈ 0 → 유의수준 5% 에서 \"상관이 0\" 귀무가설 기각.\n\n## 흔한 오답\n\n- **`np.corrcoef(x, y)[0, 1]`**: r 은 같지만 p-value 가 없습니다.\n- **스피어만/켄달과 혼동**: 본 문제는 피어슨. 비선형 관계라면 spearmanr/kendalltau 가 적합하지만 여기선 선형 가정.\n- **`df.corr()`**: 행렬 형태. p-value 없음."
+}

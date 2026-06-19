@@ -1,0 +1,21 @@
+{
+  "problem_id": "w-pvalue-001",
+  "exam_type": "written",
+  "title": "p-value 의 정확한 해석",
+  "difficulty": "medium",
+  "topic_tags": ["statistics", "hypothesis-test", "p-value"],
+  "description": "유의수준 α = 0.05 의 가설검정에서 **p-value 의 해석으로 가장 옳은 것** 은?",
+  "choices": [
+    "1. p-value 는 귀무가설이 참일 확률이다.",
+    "2. p-value 는 대립가설이 참일 확률이다.",
+    "3. 귀무가설이 참이라고 가정했을 때, 관측된 데이터(또는 더 극단적인 데이터) 가 나올 확률이다.",
+    "4. p-value 가 0.05 미만이면 효과의 크기(effect size) 가 크다는 의미이다."
+  ],
+  "expected_output": {"format": "choice", "schema": "integer (1-4)", "answer": 3},
+  "hints": [
+    "p-value 는 데이터에 대한 확률이지, 가설에 대한 확률이 아닙니다.",
+    "p-value 와 effect size 는 서로 다른 개념입니다 (전자는 우연성, 후자는 크기)."
+  ],
+  "solution_code": "print(3)\n",
+  "explanation": "## 정답: 3번\n\n**p-value 의 정확한 정의**: \"귀무가설이 참이라고 가정 했을 때, 관측된 검정통계량 (또는 그보다 더 극단적인 값) 이 나올 확률.\"\n\n수식으로: `p = P(T ≥ t_obs | H₀ 참)`\n\n## 오답 분석\n\n- **1번**: 흔한 오류. p-value 는 P(데이터 | H₀) 이지 P(H₀ | 데이터) 가 아닙니다. 베이즈 정리에 의하면 둘은 사전확률을 곱·나누어야 변환됩니다.\n- **2번**: 마찬가지로 가설의 확률이 아닙니다.\n- **4번**: p-value 가 작다는 것은 \"우연으로 나오기 어렵다\" 일 뿐 효과 크기와 무관. 표본 크기가 매우 크면 사소한 차이도 p<0.05 로 보일 수 있습니다.\n\n## 보조 가이드\n\n- 통계적 유의성(statistical significance) ≠ 실용적 유의성(practical significance).\n- 실무에선 p-value 와 함께 effect size(Cohen's d, η², 신뢰구간 등) 를 같이 보고하는 것이 권장됩니다."
+}

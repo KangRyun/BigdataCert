@@ -21,13 +21,37 @@ def client():
         yield c
 
 
+_ALL_PROBLEMS = [
+    # 작업형 1
+    ("practical_1/pp1-missing-001.json", "pp1-missing-001"),
+    ("practical_1/pp1-iqr-001.json", "pp1-iqr-001"),
+    ("practical_1/pp1-groupby-001.json", "pp1-groupby-001"),
+    ("practical_1/pp1-quantile-001.json", "pp1-quantile-001"),
+    # 작업형 2
+    ("practical_2/pp2-churn-001.json", "pp2-churn-001"),
+    ("practical_2/pp2-housing-001.json", "pp2-housing-001"),
+    ("practical_2/pp2-multi-001.json", "pp2-multi-001"),
+    ("practical_2/pp2-imbalanced-001.json", "pp2-imbalanced-001"),
+    # 작업형 3
+    ("practical_3/pp3-ttest-001.json", "pp3-ttest-001"),
+    ("practical_3/pp3-chi2-001.json", "pp3-chi2-001"),
+    ("practical_3/pp3-anova-001.json", "pp3-anova-001"),
+    ("practical_3/pp3-corr-001.json", "pp3-corr-001"),
+    # 필기
+    ("written/w-ensemble-001.json", "w-ensemble-001"),
+    ("written/w-eda-001.json", "w-eda-001"),
+    ("written/w-metrics-001.json", "w-metrics-001"),
+    ("written/w-pvalue-001.json", "w-pvalue-001"),
+]
+
+
 # ---------- 보안 회귀 ----------
 
 class TestPublicLeakage:
     """학습자에게 노출되는 응답에는 정답 단서가 절대 들어가서는 안 된다."""
 
-    @pytest.mark.parametrize("pid", ["pp1-missing-001", "pp2-churn-001", "pp3-ttest-001", "w-ensemble-001"])
-    def test_no_answer_leak(self, client: TestClient, pid: str) -> None:
+    @pytest.mark.parametrize("rel,pid", _ALL_PROBLEMS)
+    def test_no_answer_leak(self, client: TestClient, rel: str, pid: str) -> None:
         response = client.get(f"/problems/{pid}")
         assert response.status_code == 200, response.text
         body = response.json()
@@ -46,15 +70,7 @@ class TestPublicLeakage:
 # ---------- 형식별 정답 코드 → 채점 통과 ----------
 
 class TestSolutionsPassGrader:
-    @pytest.mark.parametrize(
-        "rel,pid",
-        [
-            ("practical_1/pp1-missing-001.json", "pp1-missing-001"),
-            ("practical_2/pp2-churn-001.json", "pp2-churn-001"),
-            ("practical_3/pp3-ttest-001.json", "pp3-ttest-001"),
-            ("written/w-ensemble-001.json", "w-ensemble-001"),
-        ],
-    )
+    @pytest.mark.parametrize("rel,pid", _ALL_PROBLEMS)
     def test_solution_code_passes(self, client: TestClient, rel: str, pid: str) -> None:
         problem = _load(rel)
         response = client.post(

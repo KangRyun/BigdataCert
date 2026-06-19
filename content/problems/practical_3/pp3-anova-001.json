@@ -1,0 +1,22 @@
+{
+  "problem_id": "pp3-anova-001",
+  "exam_type": "practical_3",
+  "title": "일원 분산분석 (One-way ANOVA)",
+  "difficulty": "medium",
+  "topic_tags": ["statistics", "anova", "hypothesis-test"],
+  "description": "`data.csv` 는 세 그룹 (`G1`, `G2`, `G3`) 학습자의 `score` 입니다.\n\n세 집단의 평균이 모두 같다는 귀무가설을 **일원 ANOVA** 로 검정하세요.\n\n## 출력\n출력 마지막 줄에 다음 형식의 딕셔너리를 print 하세요. 소수 4자리 반올림:\n\n```python\nprint({'f_statistic': 0.0000, 'p_value': 0.0000})\n```\n\n## 평가\n- 키 `f_statistic`, `p_value` 모두 ±0.001 허용 오차.",
+  "sample_data": {"data.csv": "data/pp3-anova-001/data.csv"},
+  "expected_output": {
+    "format": "dict",
+    "schema": {"f_statistic": "float", "p_value": "float"},
+    "tolerance": 0.001,
+    "answer": {"f_statistic": 12.9257, "p_value": 0.0}
+  },
+  "hints": [
+    "각 그룹 시리즈를 따로 분리: g1 = df[df['group']=='G1']['score'], ...",
+    "scipy.stats.f_oneway(g1, g2, g3) 로 F 와 p-value 를 얻습니다.",
+    "round(value, 4) 로 가공 후 dict 로 print."
+  ],
+  "solution_code": "import pandas as pd\nimport scipy.stats as stats\n\ndf = pd.read_csv('data.csv')\ng1 = df[df['group'] == 'G1']['score']\ng2 = df[df['group'] == 'G2']['score']\ng3 = df[df['group'] == 'G3']['score']\n\nresult = stats.f_oneway(g1, g2, g3)\nprint({'f_statistic': round(float(result.statistic), 4), 'p_value': round(float(result.pvalue), 4)})\n",
+  "explanation": "## 풀이 접근\n\n1. 그룹별 시리즈 분리.\n2. `f_oneway` 가 일원 ANOVA. 입력은 그룹별 시리즈를 가변 인자로.\n3. **결과**: F ≈ 12.93, p ≈ 0. 유의수준 5% 에서 \"세 그룹 평균이 같다\" 기각.\n\n## 흔한 오답\n\n- **두 그룹만으로 ANOVA**: 두 집단이면 ANOVA 와 두-표본 t-검정(equal_var=True) 이 동치이지만, 세 그룹 이상에서 t-검정을 반복하면 다중비교 오류가 누적됩니다.\n- **사후검정 누락**: ANOVA 만으로는 \"어느 그룹이 다른지\" 알 수 없습니다. Tukey HSD 등 사후검정이 필요하지만 이 문제는 ANOVA 결과만 요구.\n- **`groupby().mean()` 으로 끝내기**: 평균만 보는 것은 검정이 아닙니다."
+}

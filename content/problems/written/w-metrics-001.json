@@ -1,0 +1,21 @@
+{
+  "problem_id": "w-metrics-001",
+  "exam_type": "written",
+  "title": "심하게 불균형한 이진 분류 평가에 가장 부적합한 지표는?",
+  "difficulty": "medium",
+  "topic_tags": ["evaluation", "metrics", "classification"],
+  "description": "양성 비율이 1% 인 사기 탐지 데이터(이진 분류)의 모델 성능 평가에 **가장 부적합한** 지표는?",
+  "choices": [
+    "1. ROC-AUC",
+    "2. Precision-Recall AUC",
+    "3. Accuracy(정확도)",
+    "4. F1-score"
+  ],
+  "expected_output": {"format": "choice", "schema": "integer (1-4)", "answer": 3},
+  "hints": [
+    "양성이 1% 라면 \"모두 음성\" 으로 예측만 해도 99% 정확도가 나옵니다.",
+    "그 99% 가 의미가 있을지 생각해보세요."
+  ],
+  "solution_code": "print(3)\n",
+  "explanation": "## 정답: 3번 (Accuracy)\n\n양성 1% 데이터에서 **모든 표본을 음성으로 예측**하면 accuracy = 99% 가 됩니다. 모델이 사기를 단 한 건도 잡지 못해도 \"매우 정확\" 해 보이는 착각을 줍니다.\n\n## 적합한 대안\n\n- **ROC-AUC**: 임계값(threshold) 과 무관하게 순위 능력 평가.\n- **Precision-Recall AUC**: 불균형 데이터에서 ROC 보다 더 민감하게 양성 검출 성능 반영.\n- **F1-score**: precision 과 recall 의 조화평균. 양성 클래스 성능에 초점.\n\n## 보조 가이드\n\n- 양성이 50:50 균형이면 accuracy 도 의미 있습니다.\n- 양성 비율이 5% 미만이면 ROC-AUC 보다 PR-AUC 가 권장."
+}

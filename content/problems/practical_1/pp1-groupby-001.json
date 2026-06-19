@@ -1,0 +1,17 @@
+{
+  "problem_id": "pp1-groupby-001",
+  "exam_type": "practical_1",
+  "title": "범주별 평균의 최대-최소 차이",
+  "difficulty": "medium",
+  "topic_tags": ["preprocessing", "groupby", "aggregation", "pandas"],
+  "description": "`data.csv` 는 컬럼 `category` (A/B/C/D) 와 `score` 로 구성됩니다.\n\n범주별 `score` 평균 중 **최댓값과 최솟값의 차이**를 **소수 둘째 자리까지 반올림**해 출력하시오.\n\n## 출력\n- 단일 실수 (예: `12.34`).",
+  "sample_data": {"data.csv": "data/pp1-groupby-001/data.csv"},
+  "expected_output": {"format": "scalar", "schema": "float", "tolerance": 0.05, "answer": 26.29},
+  "hints": [
+    "`df.groupby('category')['score'].mean()` 으로 범주별 평균을 한 번에 구할 수 있습니다.",
+    "결과 시리즈에서 `.max()` 와 `.min()` 의 차이를 계산하세요.",
+    "`round(value, 2)` 로 소수 둘째 자리까지 반올림 후 print."
+  ],
+  "solution_code": "import pandas as pd\n\ndf = pd.read_csv('data.csv')\nmeans = df.groupby('category')['score'].mean()\nprint(round(float(means.max() - means.min()), 2))\n",
+  "explanation": "## 풀이 접근\n\n1. `groupby('category')['score'].mean()` 으로 범주별 평균 산출.\n2. `.max() - .min()` 으로 격차 계산.\n3. `round(_, 2)` 표기.\n\n## 흔한 오답\n\n- **`agg('mean')` vs `mean()`**: 결과는 같지만 가독성. groupby 후 단일 컬럼은 `.mean()` 이 표준.\n- **`np.ptp(means)` 사용**: 결과는 같지만, 시험에서는 `max-min` 이 더 명시적.\n- **`as_index=False`**: 시리즈가 아닌 DataFrame 이 반환되어 `.max()` 가 잘못된 축에서 계산될 수 있음."
+}
