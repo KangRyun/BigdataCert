@@ -8,6 +8,14 @@ dependencies = [
     "uvicorn[standard]>=0.32.0",
     "pydantic>=2.9.0",
     "pydantic-settings>=2.6.0",
+    # 샌드박스 실행 시 학습자 코드가 사용할 도메인 라이브러리.
+    # 백엔드 venv 의 sys.executable 을 그대로 sandbox subprocess 가 호출하므로
+    # 여기 설치된 패키지가 학습자 코드에 노출됨.
+    "pandas>=2.2.0",
+    "numpy>=2.0.0",
+    "scikit-learn>=1.5.0",
+    "scipy>=1.14.0",
+    "statsmodels>=0.14.0",
 ]
 
 [project.optional-dependencies]

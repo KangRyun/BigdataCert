@@ -39,6 +39,14 @@ export interface ProblemDetail extends ProblemSummary {
   hints: string[];
 }
 
+export interface GradingResult {
+  passed: boolean;
+  score: number;
+  metric_name: string;
+  feedback: string;
+  error_code: string | null;
+}
+
 export class ApiError extends Error {
   constructor(public status: number, public errorCode: string | null, message: string) {
     super(message);
@@ -46,9 +54,10 @@ export class ApiError extends Error {
   }
 }
 
-async function get<T>(path: string, init?: RequestInit): Promise<T> {
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`${baseUrl()}${path}`, {
     cache: "no-store",
+    headers: { "Content-Type": "application/json", ...(init.headers ?? {}) },
     ...init,
   });
   if (!res.ok) {
@@ -59,7 +68,7 @@ async function get<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       /* ignore */
     }
-    throw new ApiError(res.status, errorCode, `GET ${path} failed (${res.status})`);
+    throw new ApiError(res.status, errorCode, `${init.method ?? "GET"} ${path} failed (${res.status})`);
   }
   return (await res.json()) as T;
 }
@@ -70,7 +79,23 @@ export const api = {
     if (params?.exam_type) qs.set("exam_type", params.exam_type);
     if (params?.difficulty) qs.set("difficulty", params.difficulty);
     const suffix = qs.toString() ? `?${qs}` : "";
-    return get<ProblemSummary[]>(`/problems${suffix}`);
+    return request<ProblemSummary[]>(`/problems${suffix}`);
   },
-  getProblem: (id: string) => get<ProblemDetail>(`/problems/${encodeURIComponent(id)}`),
+  getProblem: (id: string) =>
+    request<ProblemDetail>(`/problems/${encodeURIComponent(id)}`),
+  submit: (problem_id: string, code: string) =>
+    request<GradingResult>("/submissions", {
+      method: "POST",
+      body: JSON.stringify({ problem_id, code }),
+    }),
+};
+
+export const ERROR_MESSAGES: Record<string, string> = {
+  TIMEOUT: "실행 시간이 초과되었습니다. (30초 제한)",
+  FORBIDDEN_PATTERN: "허용되지 않은 import 또는 함수가 사용되었습니다.",
+  RUNTIME_ERROR: "실행 중 에러가 발생했습니다. stderr를 확인하세요.",
+  OUTPUT_PARSE: "출력 형식이 기대와 다릅니다.",
+  PROBLEM_NOT_FOUND: "해당 문제를 찾을 수 없습니다.",
+  UNSUPPORTED_FORMAT: "이 문제의 채점기는 아직 구현되지 않았습니다.",
+  SPEC_MISSING_ANSWER: "문제 정의에 정답이 없습니다. 관리자에게 문의하세요.",
 };

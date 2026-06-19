@@ -11,3 +11,4 @@
 |------|----------|------|------|
 | 2026-06-19 | 초기 구성 | 전체 (에이전트 5 + 스킬 4) | 풀스택 빌드 + 콘텐츠 제작 + QA 통합을 위한 하네스 신규 구축 |
 | 2026-06-19 | Phase 1 최소 수직 슬라이스 | backend/, frontend/, content/, Makefile | 백엔드 FastAPI 부트스트랩 + 샘플 문제 1개 + 프론트 Next.js 부트스트랩 (node 설치 전 소스만). pytest 4/4 통과, OpenAPI 스냅샷 생성 |
+| 2026-06-19 | Phase 2 채점 슬라이스 | sandbox/, grading/, /submissions, Monaco UI | 사용자 코드 → 격리 실행 → scalar 채점 vertical 완성. pytest 27/27 통과, 라이브 3시나리오(정답/오답/금지패턴) 검증 |

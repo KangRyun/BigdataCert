@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app import __version__
 from app.api import problems as problems_api
+from app.api import submissions as submissions_api
 from app.config import settings
 from app.content_loader import repository
 
@@ -42,3 +43,4 @@ def healthz() -> dict[str, str]:
 
 
 app.include_router(problems_api.router)
+app.include_router(submissions_api.router)

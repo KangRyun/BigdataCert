@@ -6,7 +6,7 @@
   "topic_tags": ["preprocessing", "missing-values", "pandas"],
   "description": "주어진 `data.csv`에는 4개의 컬럼(`id`, `age`, `income`, `city`)이 있습니다.\n\n결측치(NaN)가 가장 많이 포함된 컬럼의 결측치 개수를 **정수**로 출력하시오.\n\n- 데이터 파일: `data.csv`\n- 출력: 단일 정수 (예: `7`)",
   "sample_data": {
-    "data.csv": "../data/pp1-missing-001/data.csv"
+    "data.csv": "data/pp1-missing-001/data.csv"
   },
   "expected_output": {
     "format": "scalar",
