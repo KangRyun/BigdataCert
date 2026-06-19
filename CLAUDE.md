@@ -17,3 +17,4 @@
 | 2026-06-19 | Phase 4a 회원 도메인 | db/, security, auth/me 라우터, 프론트 sign-in/up + /me | SQLAlchemy + JWT 인증, 제출 영속화, 진도 집계. pytest 59/59, 라이브 register→login→submit→/me 검증. bcrypt 4.x 호환 이슈로 bcrypt<4 핀 |
 | 2026-06-19 | Phase 4b 오답노트 + 풀이 컨텍스트 | Note 모델, /me/notes CRUD, my-history + my-note 위젯, /me/notes 목록 | 회원 도메인 완결. 한 user×problem 당 노트 1개(upsert). 풀이 화면에서 제출 후 history 자동 갱신. pytest 73/73 |
 | 2026-06-19 | Phase 5 콘텐츠 batch | 작업형 1/2/3 +3, 필기 +3 (총 12 신규) | 각 유형 4문제로 균형. 데이터셋 9개 신규 + 정답/baseline 측정. 모든 16문제에 누출·정답코드 회귀 적용. pytest 97/97 |
+| 2026-06-19 | Phase 6 UI 인프라 | Tailwind v4 + shadcn 셋업, openapi-typescript 파이프라인, localStorage 코드 드래프트 | 점진 마이그레이션 토대 마련. 풀이 코드가 새로고침해도 보존. WSL native node 미설치로 in-session 빌드 검증 불가 (코드만 작성) |

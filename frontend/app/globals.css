@@ -1,3 +1,19 @@
+@import "tailwindcss";
+
+/* Tailwind v4 의 @theme 으로 CSS 변수를 토큰화. 기존 plain CSS 클래스도
+   동일 변수를 사용하므로 점진 마이그레이션 시 충돌 없음. */
+@theme {
+  --color-bg: #0f172a;
+  --color-fg: #e2e8f0;
+  --color-muted: #94a3b8;
+  --color-accent: #38bdf8;
+  --color-card: #1e293b;
+  --color-border: #334155;
+  --color-easy: #22c55e;
+  --color-medium: #eab308;
+  --color-hard: #ef4444;
+}
+
 :root {
   --background: #0f172a;
   --foreground: #e2e8f0;
@@ -200,6 +216,17 @@ code {
 .hint-text {
   color: var(--muted);
   font-size: 0.85rem;
+}
+
+.draft-indicator {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  padding: 0.15rem 0.55rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
 }
 
 .result-pass,

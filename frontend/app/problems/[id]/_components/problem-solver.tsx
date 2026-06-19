@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   ApiError,
@@ -15,6 +15,20 @@ import { useAuth } from "@/lib/auth-context";
 
 import MyHistory from "./my-history";
 import MyNote from "./my-note";
+
+const DRAFT_KEY_PREFIX = "bigdata.draft.";
+const DRAFT_DEBOUNCE_MS = 600;
+
+function draftKey(pid: string): string {
+  return DRAFT_KEY_PREFIX + pid;
+}
+
+function formatDraftAge(savedAt: number): string {
+  const diff = Date.now() - savedAt;
+  if (diff < 5_000) return "방금 임시저장";
+  if (diff < 60_000) return `${Math.floor(diff / 1000)}초 전 임시저장`;
+  return `${Math.floor(diff / 60_000)}분 전 임시저장`;
+}
 
 const CodeEditor = dynamic(() => import("./code-editor"), {
   ssr: false,
@@ -60,12 +74,58 @@ function getStarter(p: ProblemDetail): string {
 
 export default function ProblemSolver({ problem }: { problem: ProblemDetail }) {
   const { user } = useAuth();
+  // SSR 초기값은 starter 로 통일해 hydration mismatch 회피. 마운트 후 localStorage 에서 복구.
   const [code, setCode] = useState<string>(() => getStarter(problem));
+  const [draftRestored, setDraftRestored] = useState(false);
+  const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
   const [result, setResult] = useState<GradingResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hintsRevealed, setHintsRevealed] = useState(0);
   const [submitCount, setSubmitCount] = useState(0);
+
+  // 마운트 시 임시저장 복구
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(draftKey(problem.problem_id));
+      if (saved && saved.length > 0) {
+        setCode(saved);
+        setDraftSavedAt(Date.now());
+      }
+    } catch {
+      /* storage 비활성 환경은 무시 */
+    }
+    setDraftRestored(true);
+    // problem.problem_id 가 바뀔 가능성은 라우팅상 거의 없지만 안전 차원에서 dep.
+  }, [problem.problem_id]);
+
+  // 코드 변경 시 debounced 저장
+  useEffect(() => {
+    if (!draftRestored) return;
+    const t = setTimeout(() => {
+      try {
+        localStorage.setItem(draftKey(problem.problem_id), code);
+        setDraftSavedAt(Date.now());
+      } catch {
+        /* ignore */
+      }
+    }, DRAFT_DEBOUNCE_MS);
+    return () => clearTimeout(t);
+  }, [code, draftRestored, problem.problem_id]);
+
+  function resetDraft() {
+    const ok =
+      typeof window === "undefined" ||
+      window.confirm("작성 중인 코드를 모두 지우고 시작 템플릿으로 되돌릴까요?");
+    if (!ok) return;
+    setCode(getStarter(problem));
+    try {
+      localStorage.removeItem(draftKey(problem.problem_id));
+    } catch {
+      /* ignore */
+    }
+    setDraftSavedAt(null);
+  }
 
   async function handleSubmit() {
     if (submitting) return;
@@ -148,6 +208,9 @@ export default function ProblemSolver({ problem }: { problem: ProblemDetail }) {
         >
           {submitting ? "채점 중…" : "제출 (Ctrl+Enter)"}
         </button>
+        <button type="button" className="link-btn" onClick={resetDraft}>
+          초기화
+        </button>
         <span className="hint-text">
           format: <code>{problem.expected_output.format}</code>
           {problem.expected_output.metric && (
@@ -156,6 +219,11 @@ export default function ProblemSolver({ problem }: { problem: ProblemDetail }) {
             </>
           )}
         </span>
+        {draftSavedAt !== null && (
+          <span className="draft-indicator" title="브라우저 localStorage 에 저장됨">
+            {formatDraftAge(draftSavedAt)}
+          </span>
+        )}
       </div>
 
       {error && <div className="error">{error}</div>}

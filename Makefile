@@ -24,8 +24,9 @@ test:
 	cd backend && .venv/bin/pytest -q
 
 openapi:
-	cd backend && .venv/bin/python -m app.openapi_dump > ../_workspace/openapi.json
-	@echo "wrote _workspace/openapi.json"
+	cd backend && .venv/bin/python -m app.openapi_dump > ../frontend/openapi.json
+	@echo "wrote frontend/openapi.json"
+	@echo "→ run 'cd frontend && npm run types:gen' to regenerate TS types"
 
 clean:
 	rm -rf backend/.venv backend/.pytest_cache backend/**/__pycache__

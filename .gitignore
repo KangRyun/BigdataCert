@@ -31,7 +31,9 @@ frontend/coverage/
 frontend/.env*.local
 
 # OpenAPI schema는 생성물 — 백엔드 빌드 산출물에서 갱신
+frontend/openapi.json
 frontend/lib/api/schema.d.ts
+frontend/lib/api/schema.gen.ts
 
 # ------------- DB -------------
 *.sqlite3

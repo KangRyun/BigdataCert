@@ -31,9 +31,25 @@ npm run dev
 - `app/problems/[id]/page.tsx` — 문제 상세 (Server Component)
 - `lib/api.ts` — fetch wrapper + 타입
 
-## 다음 단계
+## OpenAPI 타입 자동 동기화
 
-- Monaco 코드 에디터 통합
-- TanStack Query 도입 (제출·채점 mutation)
-- shadcn/ui + Tailwind 도입
-- OpenAPI 타입 자동 생성 (openapi-typescript)
+백엔드 변경 시:
+```bash
+# 1. 루트에서 OpenAPI 스냅샷 갱신
+make openapi   # → frontend/openapi.json
+
+# 2. 프론트에서 타입 재생성
+cd frontend && npm run types:gen   # → lib/api/schema.gen.ts
+```
+
+`npm run dev` / `npm run build` 시 `predev`/`prebuild` 훅으로 자동 실행됨.
+
+> **Windows-side Node + WSL 한계:** WSL에서 Windows 설치 Node(`node.exe`)를 호출하면 한글 경로 + UNC 경로 조합으로 인해 openapi-typescript 내부 redoc의 `fileURLToPath` 가 실패한다. **WSL native Node 설치 권장**: `sudo apt install nodejs npm` 또는 nvm.
+
+## Tailwind v4
+
+설치 완료. `app/globals.css` 상단에 `@import "tailwindcss"` + `@theme` 토큰. 기존 plain CSS 클래스(`card`, `error` 등)는 그대로 유지하면서 신규 컴포넌트는 Tailwind utility 로 작성 가능.
+
+## shadcn/ui (foundation only)
+
+`components.json`, `lib/utils.ts` (cn helper) 만 셋업. 실제 컴포넌트는 다음 슬라이스에서 `npx shadcn add button input ...` 으로 추가.
