@@ -47,6 +47,42 @@ export interface GradingResult {
   error_code: string | null;
 }
 
+export interface AuthUser {
+  id: number;
+  email: string;
+  display_name: string;
+}
+
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  user: AuthUser;
+}
+
+export interface MeSubmission {
+  id: number;
+  problem_id: string;
+  passed: boolean;
+  score: number;
+  metric_name: string;
+  feedback: string;
+  error_code: string | null;
+  created_at: string;
+}
+
+export interface TypeProgress {
+  attempts: number;
+  passed_attempts: number;
+  solved: number;
+}
+
+export interface ProgressResponse {
+  practical_1: TypeProgress;
+  practical_2: TypeProgress;
+  practical_3: TypeProgress;
+  written: TypeProgress;
+}
+
 export class ApiError extends Error {
   constructor(public status: number, public errorCode: string | null, message: string) {
     super(message);
@@ -54,11 +90,24 @@ export class ApiError extends Error {
   }
 }
 
+// 인증 토큰은 모듈 전역에 보관 — AuthProvider 가 동기화한다.
+let _authToken: string | null = null;
+export function setAuthToken(token: string | null) {
+  _authToken = token;
+}
+
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...((init.headers as Record<string, string> | undefined) ?? {}),
+  };
+  if (_authToken) {
+    headers["Authorization"] = `Bearer ${_authToken}`;
+  }
   const res = await fetch(`${baseUrl()}${path}`, {
     cache: "no-store",
-    headers: { "Content-Type": "application/json", ...(init.headers ?? {}) },
     ...init,
+    headers,
   });
   if (!res.ok) {
     let errorCode: string | null = null;
@@ -88,6 +137,25 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ problem_id, code }),
     }),
+  register: (email: string, password: string, display_name: string) =>
+    request<TokenResponse>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ email, password, display_name }),
+    }),
+  login: (email: string, password: string) =>
+    request<TokenResponse>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    }),
+  me: () => request<AuthUser>("/auth/me"),
+  mySubmissions: (params?: { problem_id?: string; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.problem_id) qs.set("problem_id", params.problem_id);
+    if (params?.limit) qs.set("limit", String(params.limit));
+    const suffix = qs.toString() ? `?${qs}` : "";
+    return request<MeSubmission[]>(`/me/submissions${suffix}`);
+  },
+  myProgress: () => request<ProgressResponse>("/me/progress"),
 };
 
 export const ERROR_MESSAGES: Record<string, string> = {
@@ -98,4 +166,9 @@ export const ERROR_MESSAGES: Record<string, string> = {
   PROBLEM_NOT_FOUND: "해당 문제를 찾을 수 없습니다.",
   UNSUPPORTED_FORMAT: "이 문제의 채점기는 아직 구현되지 않았습니다.",
   SPEC_MISSING_ANSWER: "문제 정의에 정답이 없습니다. 관리자에게 문의하세요.",
+  EMAIL_TAKEN: "이미 가입된 이메일입니다.",
+  INVALID_CREDENTIALS: "이메일 또는 비밀번호가 올바르지 않습니다.",
+  AUTH_REQUIRED: "로그인이 필요합니다.",
+  MISSING_ARTIFACT: "제출 파일(pred.csv 등)을 찾을 수 없습니다.",
+  SHAPE_MISMATCH: "제출 파일의 형식이 기대와 다릅니다.",
 };

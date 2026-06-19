@@ -14,3 +14,4 @@
 | 2026-06-19 | Phase 2 채점 슬라이스 | sandbox/, grading/, /submissions, Monaco UI | 사용자 코드 → 격리 실행 → scalar 채점 vertical 완성. pytest 27/27 통과, 라이브 3시나리오(정답/오답/금지패턴) 검증 |
 | 2026-06-19 | Phase 3 채점기·콘텐츠 확장 | csv/dict/choice 그레이더, 작업형2/3/필기 문제, schema split | 전 format 지원. 작업형2(이탈 분류, ROC-AUC 0.86), 작업형3(t-검정 dict), 필기(객관식) 1개씩. 보안 수정: answer/baseline/solution_code 가 GET /problems/{id} 응답에 노출되던 누수 차단. pytest 41/41, 라이브 4-format E2E 통과 |
 | 2026-06-19 | Auto-snapshot Stop hook | .claude/hooks/auto-snapshot.sh + settings.json | 응답 종료마다 변경분 자동 커밋. _workspace 등 .gitignore 자동 제외. push 없음 |
+| 2026-06-19 | Phase 4a 회원 도메인 | db/, security, auth/me 라우터, 프론트 sign-in/up + /me | SQLAlchemy + JWT 인증, 제출 영속화, 진도 집계. pytest 59/59, 라이브 register→login→submit→/me 검증. bcrypt 4.x 호환 이슈로 bcrypt<4 핀 |
