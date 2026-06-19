@@ -2,10 +2,14 @@
 
 샌드박스 결과(SandboxResult)와 문제의 expected_output 스키마를 받아 GradingResult를 반환.
 format 별 그레이더를 분배한다 (scalar, csv, dict, choice).
-slice 2 에서는 scalar 만 구현. 나머지는 다음 슬라이스에서 추가.
 """
 
+from pathlib import Path
+
 from app.grading.base import GradingResult
+from app.grading.choice_grader import grade_choice
+from app.grading.csv_grader import grade_csv
+from app.grading.dict_grader import grade_dict
 from app.grading.scalar import grade_scalar
 from app.sandbox import SandboxResult
 from app.schemas.problem import ExpectedOutput
@@ -16,9 +20,15 @@ _ERROR_FEEDBACK = {
 }
 
 
-def grade(spec: ExpectedOutput, result: SandboxResult) -> GradingResult:
+def grade(
+    spec: ExpectedOutput,
+    result: SandboxResult,
+    truth_paths: dict[str, Path] | None = None,
+) -> GradingResult:
     if result.error_code:
-        feedback = _ERROR_FEEDBACK.get(result.error_code) or (result.stderr[-500:] if result.stderr else "실행 중 에러가 발생했습니다.")
+        feedback = _ERROR_FEEDBACK.get(result.error_code) or (
+            result.stderr[-500:] if result.stderr else "실행 중 에러가 발생했습니다."
+        )
         return GradingResult(
             passed=False,
             score=0.0,
@@ -29,6 +39,12 @@ def grade(spec: ExpectedOutput, result: SandboxResult) -> GradingResult:
 
     if spec.format == "scalar":
         return grade_scalar(spec, result)
+    if spec.format == "csv":
+        return grade_csv(spec, result, truth_paths or {})
+    if spec.format == "dict":
+        return grade_dict(spec, result)
+    if spec.format == "choice":
+        return grade_choice(spec, result)
 
     return GradingResult(
         passed=False,

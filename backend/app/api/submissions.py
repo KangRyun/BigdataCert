@@ -27,5 +27,6 @@ def submit_code(payload: SubmissionRequest) -> GradingResult:
         raise HTTPException(status_code=404, detail={"error_code": "PROBLEM_NOT_FOUND"})
 
     sample_paths = repository.sample_data_paths(payload.problem_id)
+    truth_paths = repository.truth_data_paths(payload.problem_id)
     sandbox_result = run_in_sandbox(payload.code, sample_data_paths=sample_paths)
-    return grade(problem.expected_output, sandbox_result)
+    return grade(problem.expected_output, sandbox_result, truth_paths=truth_paths)

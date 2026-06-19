@@ -1,5 +1,18 @@
 {
   "enabledPlugins": {
     "harness@harness-marketplace": true
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/kr9370/빅분기/.claude/hooks/auto-snapshot.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
   }
 }

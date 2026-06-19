@@ -1,0 +1,24 @@
+{
+  "problem_id": "pp3-ttest-001",
+  "exam_type": "practical_3",
+  "title": "두 집단 평균 차이 검정 (Welch's t-test)",
+  "difficulty": "easy",
+  "topic_tags": ["statistics", "t-test", "hypothesis-test"],
+  "description": "데이터 `data.csv` 는 두 그룹(`A`, `B`) 학습자의 시험 점수(`score`) 입니다.\n\n두 그룹의 평균 점수에 통계적으로 유의한 차이가 있는지 **Welch's t-test**(이분산 가정)로 검정하세요.\n\n## 데이터\n- `data.csv` — 컬럼: `group` (A/B), `score` (실수)\n\n## 출력\n출력 마지막 줄에 다음 형식의 **딕셔너리**를 print 하세요. 소수점 4자리까지 반올림:\n\n```python\nprint({'t_statistic': 0.0000, 'p_value': 0.0000})\n```\n\n## 평가\n- 키 `t_statistic`, `p_value` 두 개 모두 ±0.001 허용 오차 내에서 일치해야 통과.",
+  "sample_data": {
+    "data.csv": "data/pp3-ttest-001/data.csv"
+  },
+  "expected_output": {
+    "format": "dict",
+    "schema": {"t_statistic": "float", "p_value": "float"},
+    "tolerance": 0.001,
+    "answer": {"t_statistic": 4.6455, "p_value": 0.0}
+  },
+  "hints": [
+    "scipy.stats 의 ttest_ind 를 사용하세요. equal_var=False 가 Welch's t-test 입니다.",
+    "그룹별 점수를 별도 시리즈로 분리하세요: a = df[df['group']=='A']['score'], b = ...",
+    "result = stats.ttest_ind(a, b, equal_var=False) 로 받으면 result.statistic, result.pvalue 로 접근 가능. round 로 4자리 반올림 후 dict로 print."
+  ],
+  "solution_code": "import pandas as pd\nimport scipy.stats as stats\n\ndf = pd.read_csv('data.csv')\na = df.loc[df['group'] == 'A', 'score']\nb = df.loc[df['group'] == 'B', 'score']\n\nresult = stats.ttest_ind(a, b, equal_var=False)\n\nprint({'t_statistic': round(float(result.statistic), 4), 'p_value': round(float(result.pvalue), 4)})\n",
+  "explanation": "## 풀이 접근\n\n1. **검정 선택**: 두 독립 집단의 평균 차이 → t-검정. 두 그룹의 분산이 다를 가능성이 있어 **Welch's t-test**(`equal_var=False`)를 사용.\n2. **그룹 분리**: `df.loc[df['group']=='A', 'score']` 형태로 시리즈를 추출.\n3. **결과 해석**: scipy 1.10+ 의 `ttest_ind` 결과는 `statistic`, `pvalue` 속성으로 접근.\n4. **표기**: 시험에서는 통상 소수 4자리. `round(value, 4)` 사용.\n\n## 통계적 해석\n- t ≈ 4.65, p ≈ 0.000015. 유의수준 α=0.05 에서 귀무가설(두 그룹의 평균이 같다) 기각.\n- A 그룹 평균이 B 그룹보다 유의하게 높다.\n\n## 흔한 오답\n\n- **equal_var=True 사용**: 일반 Student's t-test 가 되어 결과가 달라집니다.\n- **`stat`, `p` 같은 다른 키 이름**: 채점기는 `t_statistic`, `p_value` 만 인정.\n- **단측검정 가정**: scipy 의 ttest_ind 는 기본 양측. `alternative='greater'` 같은 옵션을 임의로 추가하지 마세요."
+}

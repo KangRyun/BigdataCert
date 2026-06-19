@@ -31,4 +31,5 @@ def get_problem(problem_id: str) -> ProblemDetail:
     problem = repository.get(problem_id)
     if not problem:
         raise HTTPException(status_code=404, detail={"error_code": "PROBLEM_NOT_FOUND"})
-    return ProblemDetail.model_validate(problem.model_dump())
+    # ProblemDetail 으로 재검증 → answer/baseline/solution_code/explanation/truth_data 자동 탈락
+    return ProblemDetail.model_validate(problem.model_dump(by_alias=True))

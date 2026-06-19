@@ -1,0 +1,29 @@
+{
+  "problem_id": "pp2-churn-001",
+  "exam_type": "practical_2",
+  "title": "통신사 고객 이탈(churn) 예측",
+  "difficulty": "medium",
+  "topic_tags": ["classification", "preprocessing", "modeling"],
+  "description": "통신사의 가입자 데이터로 향후 이탈 여부를 예측하는 모델을 만드세요.\n\n## 데이터\n- `train.csv` — 학습 데이터 (300행). 컬럼: `age`, `tenure_months`, `monthly_charge`, `has_premium`, `num_complaints`, `churn`(타겟, 0/1)\n- `test.csv` — 평가 데이터 (100행). 타겟 컬럼 없음.\n\n## 제출\n- 100행 1열짜리 `pred.csv` 파일을 생성하세요.\n- 컬럼명: `pred`\n- 값: 이탈할 확률(0~1 사이 실수, `predict_proba`의 1열).\n\n```python\npd.DataFrame({'pred': prob}).to_csv('pred.csv', index=False)\n```\n\n## 평가\n- ROC-AUC ≥ 0.78 통과 (허용 오차 ±0.03)\n- 단순 분류라벨(0/1)이 아닌 확률값을 제출해야 점수가 잘 나옵니다.",
+  "sample_data": {
+    "train.csv": "data/pp2-churn-001/train.csv",
+    "test.csv": "data/pp2-churn-001/test.csv"
+  },
+  "truth_data": {
+    "truth.csv": "data/pp2-churn-001/truth.csv"
+  },
+  "expected_output": {
+    "format": "csv",
+    "schema": "pred",
+    "metric": "roc_auc",
+    "baseline": 0.78,
+    "tolerance": 0.03
+  },
+  "hints": [
+    "train.csv 의 churn 컬럼이 타겟입니다. 분리해서 X, y 로 두세요.",
+    "수치형 특성만 있으므로 별도 인코딩 없이 바로 sklearn 모델에 넣어도 됩니다. RandomForestClassifier(n_estimators=200, random_state=42) 정도면 충분합니다.",
+    "model.predict_proba(test)[:, 1] 로 확률을 뽑아 pd.DataFrame({'pred': ...}).to_csv('pred.csv', index=False) 로 저장하세요."
+  ],
+  "solution_code": "import pandas as pd\nfrom sklearn.ensemble import RandomForestClassifier\n\ntrain = pd.read_csv('train.csv')\ntest = pd.read_csv('test.csv')\n\ny = train['churn']\nX = train.drop(columns=['churn'])\n\nmodel = RandomForestClassifier(n_estimators=300, random_state=42, n_jobs=-1).fit(X, y)\nprob = model.predict_proba(test)[:, 1]\n\npd.DataFrame({'pred': prob}).to_csv('pred.csv', index=False)\n",
+  "explanation": "## 풀이 접근\n\n1. **데이터 분리**: churn 이 타겟. train.drop(columns=['churn']) 로 특성만 남김.\n2. **모델 선택**: 모두 수치형 + 작은 데이터셋 → RandomForest 가 기본기로 충분.\n3. **확률 출력**: ROC-AUC 평가이므로 predict_proba 의 양성 클래스 확률(`[:, 1]`)을 제출.\n4. **재현성**: `random_state=42` 고정.\n\n## 흔한 오답\n\n- **확률 대신 0/1 라벨 제출**: ROC-AUC 는 순위 기반이라 가능하지만 점수가 크게 떨어집니다. 반드시 `predict_proba` 사용.\n- **컬럼명 mismatch**: 채점기는 `pred` 컬럼만 인정. `prediction`, `proba` 등은 SHAPE_MISMATCH 로 실패.\n- **id 컬럼 포함**: 이 문제는 id 가 없습니다. 추가하면 SHAPE_MISMATCH."
+}

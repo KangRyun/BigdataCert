@@ -1,0 +1,26 @@
+{
+  "problem_id": "w-ensemble-001",
+  "exam_type": "written",
+  "title": "랜덤포레스트의 특징으로 옳은 것은?",
+  "difficulty": "medium",
+  "topic_tags": ["modeling", "ensemble", "random-forest"],
+  "description": "랜덤포레스트(Random Forest) 알고리즘의 특징으로 **가장 옳은 것**을 고르시오.",
+  "choices": [
+    "1. 단일 결정트리보다 분산이 항상 커서 과적합이 심하다.",
+    "2. 부트스트랩 샘플링과 무작위 특성 선택으로 트리 간 상관을 줄여 분산을 감소시킨다.",
+    "3. 결측치가 있으면 학습이 불가능하므로 반드시 사전에 모두 채워야 한다.",
+    "4. 부스팅(Boosting) 계열 앙상블의 대표적인 예시이다."
+  ],
+  "expected_output": {
+    "format": "choice",
+    "schema": "integer (1-4)",
+    "answer": 2
+  },
+  "hints": [
+    "랜덤포레스트의 두 가지 무작위성 — 데이터 샘플링(bagging)과 분할 시 특성 선택 — 을 떠올려보세요.",
+    "Bagging 과 Boosting 의 차이를 정리해두면 4번을 빠르게 제거할 수 있습니다."
+  ],
+  "sample_data": {},
+  "solution_code": "# 정답 번호를 출력하세요.\nprint(2)\n",
+  "explanation": "## 정답: 2번\n\n랜덤포레스트는 두 가지 무작위성을 결합한 **Bagging 기반 앙상블**입니다.\n\n1. **부트스트랩 샘플링**: 각 트리가 학습 데이터를 복원 추출로 샘플링 → 트리마다 다른 데이터로 학습\n2. **무작위 특성 선택**: 각 분할에서 전체 특성의 일부만 후보로 사용 → 트리 간 상관(correlation) 감소\n\n이 두 장치로 단일 결정트리 대비 **분산이 감소**하여 일반화 성능이 향상됩니다.\n\n## 오답 분석\n\n- **1번**: 정반대. 단일 트리 대비 분산이 **감소**합니다.\n- **3번**: scikit-learn 의 RandomForestClassifier 는 결측치를 그대로는 받지 못하지만, 일부 구현(예: hist-gradient-boosting)이나 트리 자체 알고리즘은 결측 분기를 지원합니다. \"불가능하므로 반드시\" 라는 단정 표현이 함정.\n- **4번**: 랜덤포레스트는 **Bagging** 계열입니다. Boosting 의 대표는 GradientBoosting, XGBoost, LightGBM 등."
+}

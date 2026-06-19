@@ -7,6 +7,11 @@
 - 정적 검사로 위험 import/eval 차단 (static_check.py)
 
 배포 단계에서 Docker --network none --read-only로 2차 격리 추가 예정.
+
+Artifact 캡처:
+- 학습자 코드가 작업형 2 등에서 pred.csv 같은 결과 파일을 생성하면
+  tempdir 가 삭제되기 전에 텍스트로 읽어 SandboxResult.artifacts 에 담아 반환
+- 입력으로 들어간 sample_data 파일과 user.py 는 제외
 """
 
 import shutil
@@ -23,10 +28,12 @@ from app.sandbox.static_check import StaticCheckError, check_user_code
 class SandboxResult(BaseModel):
     stdout: str = ""
     stderr: str = ""
+    artifacts: dict[str, str] = {}  # filename -> 텍스트 내용 (UTF-8)
     error_code: str | None = None
 
 
 _MAX_OUTPUT_BYTES = 4000
+_MAX_ARTIFACT_BYTES = 5_000_000
 _SAFE_ENV = {"PYTHONDONTWRITEBYTECODE": "1", "PATH": "/usr/bin:/bin", "LC_ALL": "C.UTF-8"}
 
 
@@ -34,6 +41,25 @@ def _truncate(s: str, limit: int = _MAX_OUTPUT_BYTES) -> str:
     if len(s) <= limit:
         return s
     return s[:limit] + f"\n... (출력 {len(s) - limit} 바이트 절단)"
+
+
+def _collect_artifacts(tmp_path: Path, exclude: set[str]) -> dict[str, str]:
+    artifacts: dict[str, str] = {}
+    for child in tmp_path.iterdir():
+        if child.name in exclude or not child.is_file():
+            continue
+        try:
+            size = child.stat().st_size
+        except OSError:
+            continue
+        if size > _MAX_ARTIFACT_BYTES:
+            continue
+        try:
+            artifacts[child.name] = child.read_text(encoding="utf-8")
+        except (UnicodeDecodeError, OSError):
+            # 바이너리 등은 건너뜀
+            continue
+    return artifacts
 
 
 def run_in_sandbox(
@@ -74,14 +100,20 @@ def run_in_sandbox(
                 stderr=f"실행 시간 초과 (>{timeout}s)",
             )
 
+        # artifact 캡처는 성공/실패 모두에서 시도 (실패 분석에 도움)
+        exclude = set(sample_data_paths.keys()) | {"user.py"}
+        artifacts = _collect_artifacts(tmp_path, exclude)
+
         if result.returncode != 0:
             return SandboxResult(
                 error_code="RUNTIME_ERROR",
                 stdout=_truncate(result.stdout),
                 stderr=_truncate(result.stderr),
+                artifacts=artifacts,
             )
 
         return SandboxResult(
             stdout=_truncate(result.stdout),
             stderr=_truncate(result.stderr),
+            artifacts=artifacts,
         )

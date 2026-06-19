@@ -12,3 +12,5 @@
 | 2026-06-19 | 초기 구성 | 전체 (에이전트 5 + 스킬 4) | 풀스택 빌드 + 콘텐츠 제작 + QA 통합을 위한 하네스 신규 구축 |
 | 2026-06-19 | Phase 1 최소 수직 슬라이스 | backend/, frontend/, content/, Makefile | 백엔드 FastAPI 부트스트랩 + 샘플 문제 1개 + 프론트 Next.js 부트스트랩 (node 설치 전 소스만). pytest 4/4 통과, OpenAPI 스냅샷 생성 |
 | 2026-06-19 | Phase 2 채점 슬라이스 | sandbox/, grading/, /submissions, Monaco UI | 사용자 코드 → 격리 실행 → scalar 채점 vertical 완성. pytest 27/27 통과, 라이브 3시나리오(정답/오답/금지패턴) 검증 |
+| 2026-06-19 | Phase 3 채점기·콘텐츠 확장 | csv/dict/choice 그레이더, 작업형2/3/필기 문제, schema split | 전 format 지원. 작업형2(이탈 분류, ROC-AUC 0.86), 작업형3(t-검정 dict), 필기(객관식) 1개씩. 보안 수정: answer/baseline/solution_code 가 GET /problems/{id} 응답에 노출되던 누수 차단. pytest 41/41, 라이브 4-format E2E 통과 |
+| 2026-06-19 | Auto-snapshot Stop hook | .claude/hooks/auto-snapshot.sh + settings.json | 응답 종료마다 변경분 자동 커밋. _workspace 등 .gitignore 자동 제외. push 없음 |
