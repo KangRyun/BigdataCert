@@ -29,6 +29,7 @@ frontend/out/
 frontend/.turbo/
 frontend/coverage/
 frontend/.env*.local
+frontend/tsconfig.tsbuildinfo
 
 # OpenAPI schema는 생성물 — 백엔드 빌드 산출물에서 갱신
 frontend/openapi.json
