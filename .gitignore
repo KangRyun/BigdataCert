@@ -1,0 +1,50 @@
+# Harness workspace (보존하되 깃 추적 제외 — 사후 검증용 로컬 자산)
+_workspace/
+_workspace_*/
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# ------------- Backend (Python) -------------
+backend/.venv/
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/**/*.pyc
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.ruff_cache/
+backend/.coverage
+backend/htmlcov/
+backend/*.egg-info/
+backend/dist/
+backend/build/
+backend/.env
+backend/.env.local
+
+# ------------- Frontend (Next.js) -------------
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.turbo/
+frontend/coverage/
+frontend/.env*.local
+
+# OpenAPI schema는 생성물 — 백엔드 빌드 산출물에서 갱신
+frontend/lib/api/schema.d.ts
+
+# ------------- DB -------------
+*.sqlite3
+*.db
+postgres-data/
+
+# ------------- Sandbox / data -------------
+backend/sandbox/tmp/
+
+# ------------- IDE / OS -------------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
