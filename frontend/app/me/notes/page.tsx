@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
 import { ApiError, type MyNote, api } from "@/lib/api";
-import { useAuth } from "@/lib/auth-context";
 
 function formatDate(iso: string): string {
   try {
@@ -28,14 +28,14 @@ function snippet(content: string, max = 140): string {
 
 export default function NotesIndexPage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { data: session, status } = useSession();
   const [notes, setNotes] = useState<MyNote[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (authLoading) return;
-    if (!user) {
-      router.replace("/auth/sign-in");
+    if (status === "loading") return;
+    if (status === "unauthenticated") {
+      router.replace("/auth/sign-in?callbackUrl=/me/notes");
       return;
     }
     api
@@ -48,14 +48,14 @@ export default function NotesIndexPage() {
             : "백엔드 연결 실패",
         ),
       );
-  }, [authLoading, user, router]);
+  }, [status, router]);
 
-  if (authLoading || !user) return null;
+  if (status !== "authenticated") return null;
 
   return (
     <>
       <h1>오답노트</h1>
-      <p className="subtitle">{user.display_name} 님의 학습 메모.</p>
+      <p className="subtitle">{session.user?.name ?? session.user?.email} 님의 학습 메모.</p>
 
       {error && <div className="error">{error}</div>}
 

@@ -19,11 +19,18 @@ def _now() -> datetime:
 
 class User(Base):
     __tablename__ = "users"
+    __table_args__ = (
+        UniqueConstraint("oauth_provider", "oauth_sub", name="uq_users_oauth"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
-    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    # OAuth 사용자(예: Google)는 비번이 없으므로 NULL.
+    password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     display_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    # OAuth 연동 — provider 명("google") + provider 측 sub(영구 ID).
+    oauth_provider: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    oauth_sub: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_now, nullable=False
     )

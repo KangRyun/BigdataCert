@@ -1,18 +1,26 @@
 """회원 인증 API.
 
-- POST /auth/register
-- POST /auth/login
-- GET /auth/me
+- POST /auth/register      이메일/비번 가입
+- POST /auth/login         이메일/비번 로그인
+- POST /auth/google        Google ID token 검증 → 우리 JWT 발급
+- GET  /auth/me            토큰 → 본인 정보
 """
 
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token as google_id_token
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.db import get_session
 from app.db.models import User
 from app.deps import get_current_user
 from app.security import create_access_token, hash_password, verify_password
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -73,3 +81,81 @@ def login(payload: LoginRequest, db: Session = Depends(get_session)) -> TokenRes
 @router.get("/me", response_model=UserPublic)
 def me(user: User = Depends(get_current_user)) -> UserPublic:
     return UserPublic.model_validate(user)
+
+
+# ---------- Google OAuth (ID token 검증) ----------
+
+
+class GoogleAuthRequest(BaseModel):
+    id_token: str = Field(..., min_length=10, max_length=4000)
+
+
+def _verify_google_id_token(token: str) -> dict:
+    """google-auth 라이브러리로 ID token 검증. 테스트에서 monkeypatch 가능하도록 함수 분리."""
+    if not settings.google_client_id:
+        raise HTTPException(
+            status_code=503,
+            detail={"error_code": "GOOGLE_NOT_CONFIGURED"},
+        )
+    try:
+        return google_id_token.verify_oauth2_token(
+            token,
+            google_requests.Request(),
+            settings.google_client_id,
+        )
+    except ValueError as exc:
+        logger.warning("google ID token verification failed: %s", exc)
+        raise HTTPException(
+            status_code=401,
+            detail={"error_code": "INVALID_GOOGLE_TOKEN"},
+        ) from exc
+
+
+@router.post("/google", response_model=TokenResponse)
+def google_auth(
+    payload: GoogleAuthRequest,
+    db: Session = Depends(get_session),
+) -> TokenResponse:
+    info = _verify_google_id_token(payload.id_token)
+
+    sub = info.get("sub")
+    email = info.get("email")
+    if not sub or not email:
+        raise HTTPException(
+            status_code=400,
+            detail={"error_code": "INVALID_GOOGLE_PAYLOAD"},
+        )
+    if info.get("email_verified") is False:
+        raise HTTPException(
+            status_code=400,
+            detail={"error_code": "GOOGLE_EMAIL_UNVERIFIED"},
+        )
+
+    display_name = (info.get("name") or email.split("@")[0])[:50]
+
+    # 1) oauth_sub 로 직접 매치
+    user = (
+        db.query(User)
+        .filter_by(oauth_provider="google", oauth_sub=sub)
+        .first()
+    )
+    # 2) 같은 이메일의 기존(이메일/비번) 계정이 있으면 자동 linking
+    if not user:
+        user = db.query(User).filter_by(email=email).first()
+        if user:
+            user.oauth_provider = "google"
+            user.oauth_sub = sub
+        else:
+            user = User(
+                email=email,
+                password_hash=None,
+                display_name=display_name,
+                oauth_provider="google",
+                oauth_sub=sub,
+            )
+            db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    token = create_access_token(str(user.id))
+    return TokenResponse(access_token=token, user=UserPublic.model_validate(user))

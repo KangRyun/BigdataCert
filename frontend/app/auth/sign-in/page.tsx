@@ -1,40 +1,59 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { Suspense, useState } from "react";
 
-import { ApiError, ERROR_MESSAGES, api } from "@/lib/api";
-import { useAuth } from "@/lib/auth-context";
+const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_ENABLED === "1";
 
-export default function SignInPage() {
+function SignInForm() {
   const router = useRouter();
-  const { setAuth } = useAuth();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") ?? "/me";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
-    try {
-      const res = await api.login(email, password);
-      setAuth(res.access_token, res.user);
-      router.push("/me");
-    } catch (e) {
-      const code = e instanceof ApiError ? e.errorCode : null;
-      setError(code ? ERROR_MESSAGES[code] ?? "로그인에 실패했습니다." : "로그인에 실패했습니다.");
-    } finally {
-      setSubmitting(false);
+    const res = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+    setSubmitting(false);
+    if (res?.error || !res?.ok) {
+      setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+      return;
     }
+    router.push(callbackUrl);
+  }
+
+  function handleGoogle() {
+    signIn("google", { callbackUrl });
   }
 
   return (
-    <div className="auth-shell">
-      <h1>로그인</h1>
-      <form onSubmit={handleSubmit} className="auth-form">
+    <>
+      {GOOGLE_ENABLED && (
+        <>
+          <button
+            type="button"
+            className="google-btn"
+            onClick={handleGoogle}
+            disabled={submitting}
+          >
+            <span aria-hidden>🅖</span> Google 계정으로 계속하기
+          </button>
+          <div className="auth-divider"><span>또는</span></div>
+        </>
+      )}
+
+      <form onSubmit={handleEmail} className="auth-form">
         <label>
           이메일
           <input
@@ -63,6 +82,17 @@ export default function SignInPage() {
       <p className="auth-aside">
         아직 가입하지 않았나요? <Link href="/auth/sign-up">가입하기 →</Link>
       </p>
+    </>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <div className="auth-shell">
+      <h1>로그인</h1>
+      <Suspense fallback={<p className="hint-text">불러오는 중…</p>}>
+        <SignInForm />
+      </Suspense>
     </div>
   );
 }

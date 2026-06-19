@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { useState } from "react";
 
 import { ApiError, ERROR_MESSAGES, api } from "@/lib/api";
-import { useAuth } from "@/lib/auth-context";
+
+const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_ENABLED === "1";
 
 export default function SignUpPage() {
   const router = useRouter();
-  const { setAuth } = useAuth();
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
@@ -21,24 +22,51 @@ export default function SignUpPage() {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await api.register(email, password, displayName);
-      setAuth(res.access_token, res.user);
+      // 1) 백엔드에 직접 가입 요청 (NextAuth Credentials provider 가 register 를 안 함)
+      await api.register(email, password, displayName);
+      // 2) 가입 성공 → 같은 자격으로 Credentials sign-in
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+      if (!res?.ok) throw new Error("auto sign-in failed");
       router.push("/me");
     } catch (e) {
-      const code = e instanceof ApiError ? e.errorCode : null;
       if (e instanceof ApiError && e.status === 422) {
         setError("비밀번호는 8~72자, 이메일은 유효한 형식이어야 합니다.");
+      } else if (e instanceof ApiError && e.errorCode === "EMAIL_TAKEN") {
+        setError(ERROR_MESSAGES.EMAIL_TAKEN);
       } else {
-        setError(code ? ERROR_MESSAGES[code] ?? "가입에 실패했습니다." : "가입에 실패했습니다.");
+        setError("가입에 실패했습니다.");
       }
     } finally {
       setSubmitting(false);
     }
   }
 
+  function handleGoogle() {
+    signIn("google", { callbackUrl: "/me" });
+  }
+
   return (
     <div className="auth-shell">
       <h1>가입</h1>
+
+      {GOOGLE_ENABLED && (
+        <>
+          <button
+            type="button"
+            className="google-btn"
+            onClick={handleGoogle}
+            disabled={submitting}
+          >
+            <span aria-hidden>🅖</span> Google 계정으로 시작하기
+          </button>
+          <div className="auth-divider"><span>또는 이메일로 가입</span></div>
+        </>
+      )}
+
       <form onSubmit={handleSubmit} className="auth-form">
         <label>
           이메일

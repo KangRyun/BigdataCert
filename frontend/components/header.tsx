@@ -2,16 +2,17 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-
-import { useAuth } from "@/lib/auth-context";
+import { signOut, useSession } from "next-auth/react";
 
 export default function Header() {
-  const { user, loading, clearAuth } = useAuth();
+  const { data: session, status } = useSession();
+  const user = session?.user;
+  const loading = status === "loading";
   const pathname = usePathname();
   const router = useRouter();
 
-  function handleLogout() {
-    clearAuth();
+  async function handleLogout() {
+    await signOut({ redirect: false });
     router.push("/");
   }
 
@@ -27,10 +28,7 @@ export default function Header() {
           </Link>
           {user && (
             <>
-              <Link
-                href="/me"
-                className={pathname === "/me" ? "active" : ""}
-              >
+              <Link href="/me" className={pathname === "/me" ? "active" : ""}>
                 내 학습
               </Link>
               <Link
@@ -43,7 +41,7 @@ export default function Header() {
           )}
           {loading ? null : user ? (
             <>
-              <span className="user-chip">{user.display_name}</span>
+              <span className="user-chip">{user.name ?? user.email}</span>
               <button type="button" className="link-btn" onClick={handleLogout}>
                 로그아웃
               </button>

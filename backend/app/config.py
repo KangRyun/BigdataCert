@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expires_days: int = 7
 
+    # Google OAuth — frontend 가 받은 ID token 을 검증할 때 audience 비교
+    google_client_id: str | None = None
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

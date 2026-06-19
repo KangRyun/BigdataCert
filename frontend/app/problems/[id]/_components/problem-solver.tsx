@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
 import {
@@ -11,7 +12,6 @@ import {
   type ProblemDetail,
   api,
 } from "@/lib/api";
-import { useAuth } from "@/lib/auth-context";
 
 import MyHistory from "./my-history";
 import MyNote from "./my-note";
@@ -73,7 +73,8 @@ function getStarter(p: ProblemDetail): string {
 }
 
 export default function ProblemSolver({ problem }: { problem: ProblemDetail }) {
-  const { user } = useAuth();
+  const { data: session } = useSession();
+  const user = session?.user;
   // SSR 초기값은 starter 로 통일해 hydration mismatch 회피. 마운트 후 localStorage 에서 복구.
   const [code, setCode] = useState<string>(() => getStarter(problem));
   const [draftRestored, setDraftRestored] = useState(false);

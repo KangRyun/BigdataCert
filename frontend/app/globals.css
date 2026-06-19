@@ -380,6 +380,52 @@ code {
   font-size: 0.9rem;
 }
 
+.google-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #fff;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+  border-radius: 0.4rem;
+  padding: 0.65rem 0.75rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.google-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.google-btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.auth-divider span {
+  padding: 0 0.75rem;
+}
+
 /* ====== /me Dashboard ====== */
 
 .progress-grid {

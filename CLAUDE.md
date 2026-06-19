@@ -18,3 +18,4 @@
 | 2026-06-19 | Phase 4b 오답노트 + 풀이 컨텍스트 | Note 모델, /me/notes CRUD, my-history + my-note 위젯, /me/notes 목록 | 회원 도메인 완결. 한 user×problem 당 노트 1개(upsert). 풀이 화면에서 제출 후 history 자동 갱신. pytest 73/73 |
 | 2026-06-19 | Phase 5 콘텐츠 batch | 작업형 1/2/3 +3, 필기 +3 (총 12 신규) | 각 유형 4문제로 균형. 데이터셋 9개 신규 + 정답/baseline 측정. 모든 16문제에 누출·정답코드 회귀 적용. pytest 97/97 |
 | 2026-06-19 | Phase 6 UI 인프라 | Tailwind v4 + shadcn 셋업, openapi-typescript 파이프라인, localStorage 코드 드래프트 | 점진 마이그레이션 토대 마련. 풀이 코드가 새로고침해도 보존. WSL native node 미설치로 in-session 빌드 검증 불가 (코드만 작성) |
+| 2026-06-19 | Phase 7a Google OAuth (NextAuth v5) | next-auth@beta, /api/auth/[...nextauth], Google + Credentials provider. 백엔드 /auth/google + User OAuth 컬럼 | 점진 마이그레이션 1/3. 이메일/비번과 Google 공존. 백엔드 pytest 104/104. 프론트 build 성공. dev.db 재생성 필요 (User schema 변경). 7b: 백엔드가 NextAuth 토큰 검증, 7c: 백엔드 /auth/register·login 제거 |

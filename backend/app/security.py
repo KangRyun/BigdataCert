@@ -18,7 +18,10 @@ def hash_password(plain: str) -> str:
     return _pwd_ctx.hash(plain)
 
 
-def verify_password(plain: str, hashed: str) -> bool:
+def verify_password(plain: str, hashed: str | None) -> bool:
+    """OAuth-only 사용자는 password_hash 가 NULL → 항상 False."""
+    if not hashed:
+        return False
     try:
         return _pwd_ctx.verify(plain, hashed)
     except ValueError:
